@@ -50,6 +50,13 @@
 # Convert binary document formats to text before diffing them. This feature
 # is only available from the command line. Turn it on by uncommenting the 
 # entries below.
+
+###############################################################################
+# 修复GitHub语言统计
+# 将XAML和RESX文件映射为C#语言，确保正确的语言统计显示
+###############################################################################
+*.xaml linguist-language=C#
+*.resx linguist-language=C#
 ###############################################################################
 #*.doc   diff=astextplain
 #*.DOC   diff=astextplain
