@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HelpProgram"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="图片查看器" Height="540" Width="960"
         ResizeMode="CanMinimize" SizeToContent="Manual" 
@@ -20,17 +21,17 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <!-- 底部阴影层 -->
+                            <!-- 底部阴影层 - 90°方向 -->
                             <Border 
                                 Background="#F0B53F"
-                                Margin="0,3,0,0"
+                                Margin="0,0,0,0"
                                 CornerRadius="8"/>
                             <!-- 按钮主体 -->
                             <Border 
                                 x:Name="ButtonBorder"
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="8"
-                                Margin="0,0,3,3">
+                                Margin="0,0,0,3">
                                 <ContentPresenter 
                                     HorizontalAlignment="Center" 
                                     VerticalAlignment="Center"/>
@@ -43,7 +44,7 @@
                             </Trigger>
                             <!-- 按钮按下效果 -->
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Margin" Value="3,3,0,0"/>
+                                <Setter TargetName="ButtonBorder" Property="Margin" Value="0,0,0,0"/>
                                 <Setter TargetName="ButtonBorder" Property="Background" Value="#F0B53F"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
