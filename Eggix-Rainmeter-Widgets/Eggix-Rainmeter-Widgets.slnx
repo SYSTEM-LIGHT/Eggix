@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="HelpProgram/HelpProgram.csproj" Id="5acd9b39-7a2f-4363-9562-b40150f0f406" />
-  <Project Path="PidanModule/PidanModule.csproj" Id="cecbfda0-b675-49f9-9d5f-e1b43ead89cc" />
+  <Project Path="HomeSettings/HomeSettings.csproj" Id="571a93e6-e16c-4cdf-8e05-51e99b57347a" />
 </Solution>

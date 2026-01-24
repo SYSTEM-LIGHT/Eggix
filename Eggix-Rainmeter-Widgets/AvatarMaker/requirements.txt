@@ -1,0 +1,2 @@
+PySide6
+Pillow>=9.0.0
