@@ -47,7 +47,7 @@ When the EggyUI project's chat groups fell completely silent and its developers 
 **The Mission of OpenEggyUI**
 
 The establishment of OpenEggyUI is a necessary act of technical self-rescue and social reconstruction:
-- **Technical Reconstruction**: Abandoning Easy Language, building a modern architecture based on C# and WPF.
+- **Technical Reconstruction**: Abandoning Easy Language, building a modern architecture based on C# and Python.
 - **Governance Reconstruction**: Adopting a clean model of "individual maintenance led, supplemented by community contributions."
 - **Narrative Reconstruction**: Inheriting EggyUI's aesthetic ideals, but completely severing its failed technical paths and management models.
 
