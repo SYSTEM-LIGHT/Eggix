@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+# OpenEggyUI 是一个开源的 Windows 桌面美化组件项目，旨在延续 EggyUI 的精神，提供轻量化、可自由组合的美化工具。
+# 此代码由冷情镜像站编写。
+# 本项目仅用于学习与交流，严禁将 OpenEggyUI 及其组件用于任何商业用途。
+
 """
 使用PyInstaller编译AvatarMaker程序
 """
