@@ -4,29 +4,58 @@
 
 AvatarMaker 是 OpenEggyUI 的辅助组件之一，核心功能是将用户提供的头像图片裁剪为带有圆形边框的头像图片，为 OpenEggyUI 的其他组件（如桌面小部件）提供统一风格的头像素材。
 
+本工具基于 PySide6 开发，可通过可视化的 UI 设计文件快速构建交互窗口，便捷实现头像定制功能。
+
 ## 🛠️ 技术实现
 
 - **开发语言**：Python 3.12.7
-- **GUI 框架**：PyQt6
+- **GUI 框架**：PySide6
 
 ## 📦 构建与安装
 
 ### 环境要求
 
-- Python 3.12.7（**必须**）
+- Python 3.12.7（**必要**）
 
 ### 依赖安装
 
-在组件目录下执行以下命令：
+在组件目录下执行以下命令以安装依赖：
 
 ```bash
 pip install -r requirements.txt
 ```
 
+### 从 .ui 文件生成窗口 Python 代码
+
+本项目的 UI 界面通过 Qt Designer 设计并保存为 `form.ui` 文件，需将其转换为可被 Python 调用的代码文件，请在组件目录执行以下命令：
+
+
+```bash
+pyside6-uic form.ui -o ui_form.py
+```
+
+### 项目结构说明
+
+```
+AvatarMaker/
+├── README.md               # 项目说明文档
+├── README_en-us.md         # 英文说明文档
+├── form.ui                 # Qt Designer 设计的界面文件
+├── mainwindow.py           # 主窗口逻辑代码
+├── pyproject.toml          # 项目配置文件
+├── requirements.txt        # 依赖库清单
+├── resources.qrc           # 资源文件（图片等）
+├── Build/                  # 构建脚本目录
+│   ├── build_with_nuitka.py   # 使用 Nuitka 打包的脚本
+│   ├── build_with_pyinstaller.py # 使用 PyInstaller 打包的脚本
+├── resources/              # 资源目录
+│   ├── placeholder.png     # 占位图片资源
+```
+
 ### 运行方式
 
 ```bash
-python main.py
+python mainwindow.py
 ```
 
 ### 打包构建
@@ -48,6 +77,7 @@ python main.py
 - 仅支持常见图片格式（如 JPG、PNG 等）
 - 为获得最佳效果，建议使用正方形图片作为输入
 - 导出的头像图片会保持原始图片质量
+- 若修改了 `form.ui` 设计文件，需重新执行 `pyside6-uic` 命令更新生成的 Python 代码，确保界面与代码同步
 
 ## 🔒 版权声明
 
