@@ -46,6 +46,7 @@ AvatarMaker/
 ├── README.md               # 项目说明文档
 ├── README_en-us.md         # 英文说明文档
 ├── form.ui                 # Qt Designer 设计的界面文件
+├── main.py                 # 主程序入口点文件
 ├── mainwindow.py           # 主窗口逻辑代码
 ├── pyproject.toml          # 项目配置文件
 ├── requirements.txt        # 依赖库清单
@@ -60,7 +61,7 @@ AvatarMaker/
 ### 运行方式
 
 ```bash
-python mainwindow.py
+python main.py
 ```
 
 ### 打包构建

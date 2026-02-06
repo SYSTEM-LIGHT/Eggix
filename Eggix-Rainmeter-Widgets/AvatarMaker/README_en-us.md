@@ -46,6 +46,7 @@ AvatarMaker/
 ├── README.md               # Project description document
 ├── README_en-us.md         # English description document
 ├── form.ui                 # UI file designed by Qt Designer
+├── main.py                 # Main program entry point file
 ├── mainwindow.py           # Main window logic code
 ├── pyproject.toml          # Project configuration file
 ├── requirements.txt        # Dependencies list
@@ -60,7 +61,7 @@ AvatarMaker/
 ### Running Method
 
 ```bash
-python mainwindow.py
+python main.py
 ```
 
 ### Packaging and Building

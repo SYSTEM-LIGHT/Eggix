@@ -361,14 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Eggix-Rainmeter-Widgets/HomeSettingsProgram/HomeSettingsProgram.csproj
-/Eggix-Rainmeter-Widgets/AvatarMaker/Build/pyinstaller_build
-/Eggix-Rainmeter-Widgets/AvatarMaker/ui_form.py
-/Eggix-Rainmeter-Widgets/AvatarMaker/test_nuitka.py
-/Eggix-Rainmeter-Widgets/AvatarMaker/resources_rc.py
-/Eggix-Rainmeter-Widgets/AvatarMaker/Build/avatar_maker.spec
-/Eggix-Rainmeter-Widgets/Temp.txt
-/Eggix-Rainmeter-Widgets/AvatarMaker/Build/nuitka_build
-/Eggix-Rainmeter-Widgets/AvatarMaker/Build/nuitka_cache
-/Eggix-Rainmeter-Widgets/AvatarMaker/test_nuitka.dist
-/Eggix-Rainmeter-Widgets/AvatarMaker/nuitka-crash-report.xml
+
+# Code Editor Directories
+.vscode/
+.idea/
+.trae/

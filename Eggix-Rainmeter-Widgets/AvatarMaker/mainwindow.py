@@ -3,12 +3,11 @@
 # 本项目仅用于学习与交流，严禁将 OpenEggyUI 及其组件用于任何商业用途。
 
 # This Python file uses the following encoding: utf-8
-import sys
 import os
 import logging
 from PIL import Image, ImageDraw
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QProgressDialog
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QProgressDialog
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QPixmap
 
@@ -24,7 +23,7 @@ from ui_form import Ui_MainWindow
 # 设置日志
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format='[%(asctime)s][%(levelname)s]%(message)s',
     handlers=[
         logging.FileHandler("avatar_maker.log", encoding='utf-8'),
         logging.StreamHandler()
@@ -518,9 +517,3 @@ class MainWindow(QMainWindow):
                     QMessageBox.warning(self, "警告", "无法获取有效的输出目录路径")
         else:
             QMessageBox.critical(self, "错误", result["message"])
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    widget = MainWindow()
-    widget.show()
-    sys.exit(app.exec())
