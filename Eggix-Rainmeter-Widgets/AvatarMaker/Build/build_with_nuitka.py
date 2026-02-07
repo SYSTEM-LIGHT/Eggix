@@ -111,11 +111,11 @@ def main():
         print("使用 Nuitka 编译程序（优化模式）...")
 
         # 主程序路径
-        main_script = os.path.join(PROJECT_ROOT, "mainwindow.py")
+        main_script = os.path.join(PROJECT_ROOT, "main.py")
 
         # 数据文件 - 使用 filename=filename 格式
         data_files = []
-        for filename in ["ui_form.py", "form.ui", "resources_rc.py"]:
+        for filename in ["main.py", "mainwindow.py", "ui_form.py", "form.ui", "resources_rc.py"]:
             filepath = os.path.join(PROJECT_ROOT, filename)
             if os.path.exists(filepath):
                 data_files.append(f"--include-data-file={filepath}={filename}")

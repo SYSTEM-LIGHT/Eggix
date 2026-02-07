@@ -43,13 +43,15 @@ import os
 # 添加数据文件
 # 包含UI文件、资源文件和外部资源目录
 added_files = [
+    (os.path.join(r'{PROJECT_ROOT}', 'main.py'), '.'),
+    (os.path.join(r'{PROJECT_ROOT}', 'mainwindow.py'), '.'),
     (os.path.join(r'{PROJECT_ROOT}', 'ui_form.py'), '.'),
     (os.path.join(r'{PROJECT_ROOT}', 'form.ui'), '.'),
     (os.path.join(r'{PROJECT_ROOT}', 'resources_rc.py'), '.'),
     (os.path.join(r'{PROJECT_ROOT}', 'resources'), 'resources'),
 ]
 
-a = Analysis([r'{PROJECT_ROOT}/mainwindow.py'],
+a = Analysis([r'{PROJECT_ROOT}/main.py'],
              pathex=[r'{PROJECT_ROOT}'],
              binaries=[],
              datas=added_files,
