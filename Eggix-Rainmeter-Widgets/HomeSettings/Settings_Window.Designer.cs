@@ -34,11 +34,20 @@ namespace HomeSettings
             RunAvatarMakerButton = new Button();
             RefreshAvatarButton = new Button();
             RefreshAvatarListButton = new Button();
+            LevelLabel = new Label();
+            AppMenu = new ContextMenuStrip(components);
+            CreateRankFileMenuItem = new ToolStripMenuItem();
+            CreateHomeIniFileMenuItem = new ToolStripMenuItem();
+            AboutMenuItem = new ToolStripMenuItem();
+            RefreshRankInfoButton = new Button();
+            SaveRankFileMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)AvatarPictureBox).BeginInit();
+            AppMenu.SuspendLayout();
             SuspendLayout();
             // 
             // AvatarListView
             // 
+            AvatarListView.BackColor = SystemColors.Window;
             AvatarListView.LargeImageList = AvatarImageList;
             AvatarListView.Location = new Point(800, 100);
             AvatarListView.Margin = new Padding(6);
@@ -141,6 +150,62 @@ namespace HomeSettings
             RefreshAvatarListButton.UseVisualStyleBackColor = true;
             RefreshAvatarListButton.Click += RefreshAvatarListButton_Click;
             // 
+            // LevelLabel
+            // 
+            LevelLabel.AutoSize = true;
+            LevelLabel.BackColor = Color.Transparent;
+            LevelLabel.Font = new Font("方正兰亭圆简体_粗", 12F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            LevelLabel.ForeColor = Color.White;
+            LevelLabel.Location = new Point(277, 100);
+            LevelLabel.Margin = new Padding(6, 0, 6, 0);
+            LevelLabel.Name = "LevelLabel";
+            LevelLabel.Size = new Size(102, 46);
+            LevelLabel.TabIndex = 8;
+            LevelLabel.Text = "Lv.0";
+            // 
+            // AppMenu
+            // 
+            AppMenu.ImageScalingSize = new Size(40, 40);
+            AppMenu.Items.AddRange(new ToolStripItem[] { CreateRankFileMenuItem, SaveRankFileMenuItem, CreateHomeIniFileMenuItem, AboutMenuItem });
+            AppMenu.Name = "AppMenu";
+            AppMenu.Size = new Size(401, 188);
+            // 
+            // CreateRankFileMenuItem
+            // 
+            CreateRankFileMenuItem.Name = "CreateRankFileMenuItem";
+            CreateRankFileMenuItem.Size = new Size(400, 46);
+            CreateRankFileMenuItem.Text = "创建段位配置文件(&C)";
+            // 
+            // CreateHomeIniFileMenuItem
+            // 
+            CreateHomeIniFileMenuItem.Name = "CreateHomeIniFileMenuItem";
+            CreateHomeIniFileMenuItem.Size = new Size(400, 46);
+            CreateHomeIniFileMenuItem.Text = "创建home.ini文件(&H）";
+            // 
+            // AboutMenuItem
+            // 
+            AboutMenuItem.Name = "AboutMenuItem";
+            AboutMenuItem.Size = new Size(400, 46);
+            AboutMenuItem.Text = "关于(&A)";
+            // 
+            // RefreshRankInfoButton
+            // 
+            RefreshRankInfoButton.Font = new Font("方正兰亭圆简体_粗", 12F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            RefreshRankInfoButton.Location = new Point(20, 490);
+            RefreshRankInfoButton.Margin = new Padding(6);
+            RefreshRankInfoButton.Name = "RefreshRankInfoButton";
+            RefreshRankInfoButton.Size = new Size(375, 100);
+            RefreshRankInfoButton.TabIndex = 9;
+            RefreshRankInfoButton.Text = "刷新段位信息";
+            RefreshRankInfoButton.UseVisualStyleBackColor = true;
+            RefreshRankInfoButton.Click += RefreshRankInfoButton_Click;
+            // 
+            // SaveRankFileMenuItem
+            // 
+            SaveRankFileMenuItem.Name = "SaveRankFileMenuItem";
+            SaveRankFileMenuItem.Size = new Size(400, 46);
+            SaveRankFileMenuItem.Text = "保存段位配置文件(&S)";
+            // 
             // Settings_Window
             // 
             AutoScaleDimensions = new SizeF(18F, 39F);
@@ -148,6 +213,9 @@ namespace HomeSettings
             BackgroundImage = Properties.Resources.background;
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(1600, 900);
+            ContextMenuStrip = AppMenu;
+            Controls.Add(RefreshRankInfoButton);
+            Controls.Add(LevelLabel);
             Controls.Add(RefreshAvatarListButton);
             Controls.Add(RefreshAvatarButton);
             Controls.Add(RunAvatarMakerButton);
@@ -166,6 +234,7 @@ namespace HomeSettings
             StartPosition = FormStartPosition.CenterScreen;
             Text = "鸡蛋鸭蛋荷包蛋";
             ((System.ComponentModel.ISupportInitialize)AvatarPictureBox).EndInit();
+            AppMenu.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -181,5 +250,12 @@ namespace HomeSettings
         private Button RunAvatarMakerButton;
         private Button RefreshAvatarButton;
         private Button RefreshAvatarListButton;
+        private Label LevelLabel;
+        private ContextMenuStrip AppMenu;
+        private ToolStripMenuItem CreateRankFileMenuItem;
+        private ToolStripMenuItem AboutMenuItem;
+        private ToolStripMenuItem CreateHomeIniFileMenuItem;
+        private Button RefreshRankInfoButton;
+        private ToolStripMenuItem SaveRankFileMenuItem;
     }
 }

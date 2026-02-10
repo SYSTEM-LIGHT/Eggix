@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EggyRankData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!-- 您可通过修改此文件来调整您的蛋仔等级。 -->
+  <!--
+  BasicRank 表示巅峰派对大段位，其值如下：
+  1 —— 鹌鹑蛋
+  2 —— 鸽子蛋
+  3 —— 鸡蛋
+  4 —— 鹅蛋
+  5 —— 鸵鸟蛋
+  6 —— 恐龙蛋
+  7 —— 巅峰凤凰蛋
+  8 —— 超级凤凰蛋
+  9 —— 无敌凤凰蛋
+  -->
+  <BasicRank>9</BasicRank>
+
+  <!--
+  SmallRank 表示巅峰派对小段位，
+  如果 BasicRank 为 6 及以下，则表示阶数
+  如果 BasicRank 为 7 及以上，则表示分数
+  -->
+  <SmallRank>1500</SmallRank>
+
+  <!-- 蛋仔等级 -->
+  <Level>35</Level>
+  <!-- EggyUI-RE&OpenEggyUI交流QQ群：1079576546 -->
+</EggyRankData>

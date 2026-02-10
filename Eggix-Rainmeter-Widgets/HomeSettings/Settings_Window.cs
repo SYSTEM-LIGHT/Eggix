@@ -4,15 +4,14 @@
 
 using System.Data;
 using System.Diagnostics;
-using System.Security;
 
 namespace HomeSettings
 {
     public partial class Settings_Window : Form
     {
-        string appPath = AppDomain.CurrentDomain.BaseDirectory;
-        string avatarFolderPath;
-        string avatarImageFilePath;
+        private readonly string appPath = AppDomain.CurrentDomain.BaseDirectory;
+        private readonly string avatarFolderPath;
+        private readonly string avatarImageFilePath;
 
         public Settings_Window()
         {
@@ -24,10 +23,14 @@ namespace HomeSettings
             avatarImageFilePath = Path.Combine(appPath, "avatar.png");
 
             CreateAvatarFolder();
-            
+
+            InitializeEggyRank();
+
             LoadAvatarImage();
             LoadAvatarImageList();
         }
+
+        #region 窗口方法
 
         /// <summary>
         /// 应用窗口主题
@@ -39,26 +42,53 @@ namespace HomeSettings
                 if (DarkModeHelper.IsDarkModeEnabled())
                 {
                     this.BackgroundImage = Properties.Resources.background_dark;
+                    AvatarListView.BackColor = SystemColors.Window;
+                    AvatarListView.ForeColor = SystemColors.WindowText;
                 }
                 else
                 {
                     this.BackgroundImage = Properties.Resources.background;
+                    AvatarListView.BackColor = Color.FromArgb(15, 108, 230);
+                    AvatarListView.ForeColor = Color.White;
                 }
             }
             catch
             {
                 this.BackgroundImage = null;
+                AvatarListView.BackColor = SystemColors.Window;
+
             }
         }
 
         /// <summary>
-        /// 显示错误提示
+        /// 初始化蛋仔段位信息
         /// </summary>
-        /// <param name="message">错误消息</param>
-        /// <param name="failActionTitle">发生错误的操作标题</param>
-        private void ShowError(string message, string failActionTitle)
+        private void InitializeEggyRank()
         {
-            MessageBox.Show(message, failActionTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            string eggyDataXmlFilePath = Path.Combine(appPath, "EggyData.xml");
+
+            try
+            {
+                EggyRank eggyRank = new EggyRank(eggyDataXmlFilePath);
+                LevelLabel.Text = $"{eggyRank}\nLv.{eggyRank.CurrentRank.Level}";
+            }
+            catch (FileNotFoundException)
+            {
+                EggyRank eggyRank = new EggyRank();
+                LevelLabel.Text = $"{eggyRank}\nLv.{eggyRank.CurrentRank.Level}";
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex, "段位信息加载");
+                LevelLabel.Text = "段位信息加载失败";
+            }
+        }
+
+        private void ShowError(Exception ex, string failActionTitle)
+        {
+            MessageBox.Show(
+                $"{failActionTitle}发生异常：{ex.GetType().Name}\r\n异常信息：{ex.Message}\r\n异常堆栈：{ex.StackTrace}",
+                $"{failActionTitle}错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         /// <summary>
@@ -66,57 +96,26 @@ namespace HomeSettings
         /// </summary>
         private void LoadAvatarImage()
         {
-            // 释放头像控件的图片资源
             AvatarPictureBox.Image?.Dispose();
             AvatarPictureBox.Image = null;
 
             try
             {
-                if (File.Exists(avatarImageFilePath))
-                {
-                    using Image tempImage = Image.FromFile(avatarImageFilePath, true);
+                using Image tempImage = Image.FromFile(avatarImageFilePath, true);
 
-                    // 判断图片尺寸是否满足在512x512范围内的要求
-                    if (tempImage.Width > 0 && tempImage.Width <= 512 &&
-                        tempImage.Height > 0 && tempImage.Height <= 512)
-                    {
-                        // 创建图片副本，避免文件被锁定
-                        // 创建的Bitmap对象作为AvatarBox控件的图像，在刷新头像的时候会被Dispose掉
-                        AvatarPictureBox.Image = new Bitmap(tempImage);
-                    }
-                    else
-                    {
-                        // 如果图片尺寸不满足要求
-                        ShowError($"头像图片的尺寸必须在512x512范围内。", "头像加载失败");
-                    }
-                    // 对于简化的 using 声明（例如 using var imageStream = ...;），
-                    // 资源会在当前作用域结束时自动释放，无需手动调用 Close() 或 Dispose()。
+                if (tempImage.Width > 0 && tempImage.Width <= 512 &&
+                    tempImage.Height > 0 && tempImage.Height <= 512)
+                {
+                    AvatarPictureBox.Image = new Bitmap(tempImage);
                 }
                 else
                 {
-                    // 当头像图片文件不存在时
-                    ShowError($"找不到头像图片文件：{avatarImageFilePath}", "头像加载失败");
+                    ShowError(new Exception("头像图片的尺寸必须在512x512范围内。"), "头像加载");
                 }
-            }
-            catch (SecurityException)
-            {
-                // 捕获权限异常
-                ShowError("尝试访问头像图片时遇到权限错误，请以管理员身份运行本程序！", "头像加载失败");
-            }
-            catch (IOException ioex)
-            {
-                // 捕获IO异常
-                ShowError($"尝试访问头像图片文件时遇到文件IO错误：{ioex.Message}", "头像加载失败");
-            }
-            catch (OutOfMemoryException oomex)
-            {
-                // 捕获图像解码异常（不是真的内存不足）
-                ShowError($"头像图片文件损坏或格式错误，无法正常解码！{oomex.Message}", "头像加载失败");
             }
             catch (Exception ex)
             {
-                // 捕获其他异常
-                ShowError($"尝试访问头像文件时遇到错误：{ex.Message}", "头像加载失败");
+                ShowError(ex, "头像加载");
             }
         }
 
@@ -130,23 +129,12 @@ namespace HomeSettings
 
             try
             {
-                if (File.Exists(sourceAvatarFilePath))
-                {
-                    File.Copy(sourceAvatarFilePath, avatarImageFilePath, true);
-                    LoadAvatarImage();
-                }
-                else
-                {
-                    ShowError($"目标头像文件不存在：{avatarImageFilePath}", "头像更换失败");
-                }
-            }
-            catch (IOException ioex)
-            {
-                ShowError($"尝试访问目标头像文件时遇到文件IO错误：{ioex.Message}", "头像加载失败");
+                File.Copy(sourceAvatarFilePath, avatarImageFilePath, true);
+                LoadAvatarImage();
             }
             catch (Exception ex)
             {
-                ShowError($"尝试更换头像时遇到错误：{ex.Message}", "头像加载失败");
+                ShowError(ex, "头像更换");
             }
         }
 
@@ -155,68 +143,92 @@ namespace HomeSettings
         /// </summary>
         private void LoadAvatarImageList()
         {
-            // 清空现有列表
-            AvatarListView.Items.Clear();
-            AvatarImageList.Images.Clear();
+            ClearAvatarList();
 
             try
             {
-                if (Directory.Exists(avatarFolderPath))
-                {
-                    
-                    // 获取文件夹中的所有PNG图片文件
-                    string[] imageFiles = Directory.GetFiles(avatarFolderPath)
-                        .Where(file => Path.GetExtension(file).Equals(
-                            ".png", StringComparison.CurrentCultureIgnoreCase))
-                        .OrderBy(file => file)
-                        .ToArray();
-
-                    // 遍历所有图片文件
-                    foreach (string filePath in imageFiles)
-                    {
-                        string fileName = Path.GetFileName(filePath);
-
-                        try
-                        {
-                            // 加载图片到imageList
-                            using (Image tempImage = Image.FromFile(filePath))
-                            {
-                                // 创建图片副本，避免文件被锁定
-                                Image imageCopy = new Bitmap(tempImage);
-                                AvatarImageList.Images.Add(fileName, imageCopy);
-                            }
-
-                            // 创建ListViewItem
-                            ListViewItem item = new ListViewItem(fileName);
-                            item.ImageKey = fileName;
-                            AvatarListView.Items.Add(item);
-                        }
-                        catch
-                        {
-                            // 忽略异常，继续处理下一个文件
-                        }
-                    }
-                }
-                else
-                {
-                    ShowError("头像文件夹不存在！", "头像列表加载失败");
-                }
-            }
-            catch (SecurityException)
-            {
-                // 捕获权限异常
-                ShowError("尝试访问头像文件夹时遇到权限错误，请以管理员身份运行本程序！", "头像列表加载失败");
-            }
-            catch (IOException ioex)
-            {
-                // 捕获IO异常
-                ShowError($"尝试访问头像文件夹时遇到文件IO错误：{ioex.Message}", "头像列表加载失败");
+                LoadAvatarImagesFromDirectory();
             }
             catch (Exception ex)
             {
-                // 捕获其他异常
-                ShowError($"尝试加载头像列表时遇到错误：{ex.Message}", "头像列表加载失败");
+                ShowError(ex, "头像列表加载");
             }
+        }
+
+        /// <summary>
+        /// 清空头像列表
+        /// </summary>
+        private void ClearAvatarList()
+        {
+            AvatarListView.Items.Clear();
+            AvatarImageList.Images.Clear();
+        }
+
+        /// <summary>
+        /// 从目录加载头像图片
+        /// </summary>
+        private void LoadAvatarImagesFromDirectory()
+        {
+            string[] imageFiles = GetAvatarImageFiles();
+
+            foreach (string filePath in imageFiles)
+            {
+                LoadSingleAvatarImage(filePath);
+            }
+        }
+
+        /// <summary>
+        /// 获取头像图片文件列表
+        /// </summary>
+        private string[] GetAvatarImageFiles()
+        {
+            return Directory.GetFiles(avatarFolderPath)
+                .Where(file => Path.GetExtension(file).Equals(".png", StringComparison.CurrentCultureIgnoreCase))
+                .OrderBy(file => file)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// 加载单个头像图片
+        /// </summary>
+        private void LoadSingleAvatarImage(string filePath)
+        {
+            string fileName = Path.GetFileName(filePath);
+
+            if (!TryLoadImageToList(filePath, fileName))
+            {
+                return;
+            }
+
+            AddAvatarListViewItem(fileName);
+        }
+
+        /// <summary>
+        /// 尝试加载图片到ImageList
+        /// </summary>
+        private bool TryLoadImageToList(string filePath, string fileName)
+        {
+            try
+            {
+                using Image tempImage = Image.FromFile(filePath);
+                Image imageCopy = new Bitmap(tempImage);
+                AvatarImageList.Images.Add(fileName, imageCopy);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 添加头像到ListView
+        /// </summary>
+        private void AddAvatarListViewItem(string fileName)
+        {
+            ListViewItem item = new ListViewItem(fileName);
+            item.ImageKey = fileName;
+            AvatarListView.Items.Add(item);
         }
 
         /// <summary>
@@ -224,24 +236,16 @@ namespace HomeSettings
         /// </summary>
         private void OpenAvatarFolder()
         {
-            // 打开头像目录
             try
             {
-                if (Directory.Exists(avatarFolderPath))
+                Process.Start(new ProcessStartInfo(avatarFolderPath)
                 {
-                    Process.Start(new ProcessStartInfo(avatarFolderPath)
-                    {
-                        UseShellExecute = true
-                    });
-                }
-                else
-                {
-                    ShowError("头像文件夹不存在！", "头像文件夹打开失败");
-                }
+                    UseShellExecute = true
+                });
             }
             catch (Exception ex)
             {
-                ShowError($"尝试打开头像文件夹时发生错误：{ex.Message}", "头像文件夹打开失败");
+                ShowError(ex, "头像文件夹打开");
             }
         }
 
@@ -250,27 +254,18 @@ namespace HomeSettings
         /// </summary>
         private void RunAvatarMaker()
         {
-            // 头像制作器暂未设计完成。
             string avatarMakerPath = Path.Combine(appPath, "AvatarMaker.exe");
 
-            // 打开头像目录
             try
             {
-                if (File.Exists(avatarMakerPath))
+                Process.Start(new ProcessStartInfo(avatarMakerPath)
                 {
-                    Process.Start(new ProcessStartInfo(avatarMakerPath)
-                    {
-                        UseShellExecute = true
-                    });
-                }
-                else
-                {
-                    ShowError("头像制作器文件不存在！", "头像制作器运行失败");
-                }
+                    UseShellExecute = true
+                });
             }
             catch (Exception ex)
             {
-                ShowError($"尝试运行头像制作器时发生错误：{ex.Message}", "头像制作器运行失败");
+                ShowError(ex, "头像制作器运行");
             }
         }
 
@@ -287,22 +282,15 @@ namespace HomeSettings
                     Directory.CreateDirectory(avatarFolderPath);
                 }
             }
-            catch (SecurityException)
-            {
-                // 捕获权限异常
-                ShowError("尝试创建头像目录时遇到权限错误，请以管理员身份运行本程序！", "头像目录创建失败");
-            }
-            catch (IOException ioex)
-            {
-                // 捕获IO异常
-                ShowError($"尝试创建头像目录时遇到文件IO错误：{ioex.Message}", "头像目录创建失败");
-            }
             catch (Exception ex)
             {
-                // 捕获其他异常
-                ShowError($"尝试创建头像目录时遇到错误：{ex.Message}", "头像目录创建失败");
+                ShowError(ex, "头像目录创建");
             }
         }
+
+        #endregion
+
+        #region 窗口事件处理程序
 
         private void OpenAvatarFolderButton_Click(object sender, EventArgs e)
         {
@@ -335,5 +323,12 @@ namespace HomeSettings
                 ChangeAvatar(selectedAvatarFileName);
             }
         }
+
+        private void RefreshRankInfoButton_Click(object sender, EventArgs e)
+        {
+            InitializeEggyRank();
+        }
+
+        #endregion
     }
 }
