@@ -7,15 +7,15 @@ using System.Runtime.InteropServices;
 
 namespace HomeSettings
 {
-    internal static class Program
+    internal static partial class Program
     {
-        [DllImport("user32.dll")]
+        [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetForegroundWindow(nint hWnd);
+        private static partial bool SetForegroundWindow(nint hWnd);
 
-        [DllImport("user32.dll")]
+        [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool ShowWindowAsync(nint hWnd, int nCmdShow);
+        private static partial bool ShowWindowAsync(nint hWnd, int nCmdShow);
 
         private const int SW_SHOWNORMAL = 1;
         private const int SW_RESTORE = 9;
@@ -36,7 +36,7 @@ namespace HomeSettings
 
                 if (createdNew)
                 {
-                    RunApplication(mutex);
+                    RunApplication();
                 }
                 else
                 {
@@ -46,7 +46,7 @@ namespace HomeSettings
             catch (AbandonedMutexException)
             {
                 createdNew = true;
-                RunApplication(mutex);
+                RunApplication();
             }
             catch (UnauthorizedAccessException)
             {
@@ -64,7 +64,11 @@ namespace HomeSettings
                     {
                         mutex?.ReleaseMutex();
                     }
-                    catch { }
+                    catch
+                    {
+                        // 忽略异常
+                    }
+
                     mutex?.Dispose();
                 }
             }
@@ -73,7 +77,7 @@ namespace HomeSettings
         /// <summary>
         /// 运行应用程序
         /// </summary>
-        private static void RunApplication(Mutex? mutex)
+        private static void RunApplication()
         {
             try
             {
@@ -93,7 +97,7 @@ namespace HomeSettings
                     return;
                 }
 
-                Application.Run(new Settings_Window());
+                Application.Run(new SettingsWindow());
             }
             catch (Exception ex)
             {
@@ -117,9 +121,9 @@ namespace HomeSettings
                     return;
                 }
 
-                foreach (Process? process in processes)
+                foreach (Process process in processes)
                 {
-                    if (process is null || process.Id == current.Id)
+                    if (process.Id == current.Id)
                     {
                         continue;
                     }
@@ -135,7 +139,6 @@ namespace HomeSettings
                     }
                     catch (InvalidOperationException)
                     {
-                        continue;
                     }
                 }
             }

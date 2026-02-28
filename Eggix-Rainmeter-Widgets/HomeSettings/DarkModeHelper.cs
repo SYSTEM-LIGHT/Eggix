@@ -4,33 +4,30 @@
 
 using Microsoft.Win32;
 
-namespace HomeSettings
-{
-    public static class DarkModeHelper
-    {
-        /// <summary>
-        /// 检查当前是否启用深色模式
-        /// </summary>
-        public static bool IsDarkModeEnabled()
-        {
-            try
-            {
-                // Windows 10/11
-                using (var key = Registry.CurrentUser.OpenSubKey(
-                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
-                {
-                    if (key?.GetValue("AppsUseLightTheme") is int lightTheme)
-                    {
-                        return lightTheme == 0;
-                    }
-                }
-            }
-            catch
-            {
-                // 注册表访问失败
-            }
+namespace HomeSettings;
 
-            return false;
+public static class DarkModeHelper
+{
+    /// <summary>
+    /// 检查当前是否启用深色模式
+    /// </summary>
+    public static bool IsDarkModeEnabled()
+    {
+        try
+        {
+            // Windows 10/11
+            using var key = Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            if (key?.GetValue("AppsUseLightTheme") is int lightTheme)
+            {
+                return lightTheme == 0;
+            }
         }
+        catch
+        {
+            // 注册表访问失败
+        }
+
+        return false;
     }
 }

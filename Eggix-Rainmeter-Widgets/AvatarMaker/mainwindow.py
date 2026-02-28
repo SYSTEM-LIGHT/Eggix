@@ -126,16 +126,16 @@ class ProcessThread(QThread):
                 "message": f"处理失败: {str(e)}",
                 "error_code": "PROCESS_ERROR"
             }
-    
+
     def crop_to_circle(self, input_path, output_path, size=128):
         """
         将图像裁剪为圆形边框
-        
+
         Args:
             input_path: 输入图像路径
             output_path: 输出图像路径
             size: 输出图像尺寸（正方形）
-        
+
         Returns:
             dict: 处理结果
         """
@@ -147,54 +147,54 @@ class ProcessThread(QThread):
                     "message": f"输入文件不存在: {input_path}",
                     "error_code": "FILE_NOT_FOUND"
                 }
-            
+
             # 验证输出目录
             output_dir = os.path.dirname(output_path)
             if output_dir and not os.path.exists(output_dir):
                 os.makedirs(output_dir, exist_ok=True)
-            
+
             # 打开原始图像
             logger.info(f"处理图像: {input_path}")
             original = Image.open(input_path).convert("RGBA")
-            
+
             # 创建新的透明背景图像
             result = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-            
+
             # 计算缩放和裁剪参数
             width, height = original.size
             logger.debug(f"原始尺寸: {width}x{height}")
-            
+
             # 计算缩放比例，使图像完全覆盖目标区域
             scale = max(size / width, size / height)
             new_width = int(width * scale)
             new_height = int(height * scale)
             logger.debug(f"缩放后尺寸: {new_width}x{new_height}, 缩放比例: {scale:.2f}")
-            
+
             # 缩放图像
             resized = original.resize((new_width, new_height), Image.Resampling.LANCZOS)
-            
+
             # 计算裁剪位置（居中）
             left = (new_width - size) // 2
             top = (new_height - size) // 2
             right = left + size
             bottom = top + size
-            
+
             # 裁剪图像
             cropped = resized.crop((left, top, right, bottom))
-            
+
             # 创建圆形蒙版
             mask = Image.new("L", (size, size), 0)
             draw = ImageDraw.Draw(mask)
             draw.ellipse((0, 0, size, size), fill=255)
-            
+
             # 应用圆形蒙版
             result.putalpha(mask)
             result.paste(cropped, (0, 0), mask)
-            
+
             # 保存结果
             result.save(output_path, "PNG")
             logger.info(f"图像已保存到: {output_path}")
-            
+
             return {
                 "success": True,
                 "message": "处理成功",
@@ -202,7 +202,7 @@ class ProcessThread(QThread):
                 "input_size": f"{width}x{height}",
                 "output_size": f"{size}x{size}"
             }
-            
+
         except Exception as e:
             logger.error(f"处理失败: {str(e)}")
             return {
@@ -210,7 +210,7 @@ class ProcessThread(QThread):
                 "message": f"处理失败: {str(e)}",
                 "error_code": "PROCESS_ERROR"
             }
-    
+
     def batch_process(self):
         """
         批量处理目录中的所有图像
@@ -391,7 +391,7 @@ class MainWindow(QMainWindow):
         if text:
             try:
                 size = int(text)
-                if size >= 64 and size <= 8192:
+                if 64 <= size <= 8192:
                     self.ui.sizeValueLabel.setText(str(size))
                 else:
                     self.ui.sizeValueLabel.setText("128")

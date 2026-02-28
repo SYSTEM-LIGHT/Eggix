@@ -53,28 +53,15 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="background" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="background-dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\background-dark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="background_540P" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\background_540P.png;System.Drawing.Bitmap, System.Drawing.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value>
-  </data>
-  <data name="background_720P" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\background_720P.png;System.Drawing.Bitmap, System.Drawing.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value>
-  </data>
-  <data name="background_dark_540P" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\background_dark_540P.png;System.Drawing.Bitmap, System.Drawing.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value>
-  </data>
-  <data name="background_dark_720P" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\background_dark_720P.png;System.Drawing.Bitmap, System.Drawing.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value>
-  </data>
+  <metadata name="AvatarImageList.TrayLocation" type="System.Drawing.Point, System.Drawing.Primitives, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <metadata name="AppMenu.TrayLocation" type="System.Drawing.Point, System.Drawing.Primitives, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>336, 17</value>
+  </metadata>
 </root>

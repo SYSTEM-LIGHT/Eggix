@@ -2,32 +2,27 @@
 // 此代码由冷情镜像站编写。
 // 本项目仅用于学习与交流，严禁将 OpenEggyUI 及其组件用于任何商业用途。
 
-using System.Data;
 using System.Diagnostics;
+using System.Drawing.Text;
+using HomeSettings.Properties;
 
 namespace HomeSettings
 {
-    public partial class Settings_Window : Form
+    public partial class SettingsWindow : Form
     {
-        private readonly string appPath = AppDomain.CurrentDomain.BaseDirectory;
-        private readonly string avatarFolderPath;
-        private readonly string avatarImageFilePath;
+        private readonly string _appPath = AppDomain.CurrentDomain.BaseDirectory;
+        private readonly string _avatarFolderPath;
+        private readonly string _avatarImageFilePath;
+        private readonly bool _darkMode = DarkModeHelper.IsDarkModeEnabled();
 
-        public Settings_Window()
+        public SettingsWindow()
         {
             InitializeComponent();
-
-            ApplyTheme();
-
-            avatarFolderPath = Path.Combine(appPath, "Avatars");
-            avatarImageFilePath = Path.Combine(appPath, "avatar.png");
-
+            
+            _avatarFolderPath = Path.Combine(_appPath, "Avatars");
+            _avatarImageFilePath = Path.Combine(_appPath, "avatar.png");
+            
             CreateAvatarFolder();
-
-            InitializeEggyRank();
-
-            LoadAvatarImage();
-            LoadAvatarImageList();
         }
 
         #region 窗口方法
@@ -35,28 +30,54 @@ namespace HomeSettings
         /// <summary>
         /// 应用窗口主题
         /// </summary>
-        private void ApplyTheme()
+        private void ApplyTheme(bool darkMode)
+        {
+            const string fontName = "方正兰亭圆简体_粗";
+            using (var installedFonts = new InstalledFontCollection())
+            {
+                if (installedFonts.Families.Any(f => f.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    foreach (var control in this.Controls.OfType<Control>())
+                    {
+                        float fontSize = control.Font.Size;
+                        control.Font.Dispose();
+                        control.Font = new Font(fontName, fontSize, FontStyle.Regular);
+                    }
+                }
+            }
+            
+            this.BackColor = darkMode ? SystemColors.Window : Color.FromArgb(11, 148, 255);
+            AvatarListView.BackColor = darkMode ? SystemColors.Window : Color.FromArgb(15, 108, 230);
+            AvatarListView.ForeColor = darkMode ? SystemColors.WindowText : Color.White;
+            
+            SetBackgroundImage(this.DeviceDpi, darkMode);
+        }
+
+        /// <summary>
+        /// 设置窗口背景
+        /// </summary>
+        /// <param name="dpi">当前DPI</param>
+        /// <param name="darkMode">深色模式状态</param>
+        private void SetBackgroundImage(int dpi, bool darkMode)
         {
             try
             {
-                if (DarkModeHelper.IsDarkModeEnabled())
-                {
-                    this.BackgroundImage = Properties.Resources.background_dark;
-                    AvatarListView.BackColor = SystemColors.Window;
-                    AvatarListView.ForeColor = SystemColors.WindowText;
-                }
-                else
-                {
-                    this.BackgroundImage = Properties.Resources.background;
-                    AvatarListView.BackColor = Color.FromArgb(15, 108, 230);
-                    AvatarListView.ForeColor = Color.White;
-                }
+                this.BackgroundImage = darkMode ? dpi switch
+                    {
+                        >= 96 and < 144 => Resources.background_dark_540P,
+                        >= 144 and < 192 => Resources.background_dark_720P,
+                        _ => Resources.background_dark
+                    }
+                    : dpi switch
+                    {
+                        >= 96 and < 144 => Resources.background_540P,
+                        >= 144 and < 192 => Resources.background_720P,
+                        _ => Resources.background
+                    };
             }
             catch
             {
                 this.BackgroundImage = null;
-                AvatarListView.BackColor = SystemColors.Window;
-
             }
         }
 
@@ -65,7 +86,7 @@ namespace HomeSettings
         /// </summary>
         private void InitializeEggyRank()
         {
-            string eggyDataXmlFilePath = Path.Combine(appPath, "EggyData.xml");
+            string eggyDataXmlFilePath = Path.Combine(_appPath, "EggyData.xml");
 
             try
             {
@@ -101,16 +122,16 @@ namespace HomeSettings
 
             try
             {
-                using Image tempImage = Image.FromFile(avatarImageFilePath, true);
+                using Image tempImage = Image.FromFile(_avatarImageFilePath, true);
+                Size imageSize = tempImage.Size;
 
-                if (tempImage.Width > 0 && tempImage.Width <= 512 &&
-                    tempImage.Height > 0 && tempImage.Height <= 512)
+                if (imageSize is { IsEmpty: false, Height: <= 512, Width: <= 512 })
                 {
                     AvatarPictureBox.Image = new Bitmap(tempImage);
                 }
                 else
                 {
-                    ShowError(new Exception("头像图片的尺寸必须在512x512范围内。"), "头像加载");
+                    throw new ArgumentOutOfRangeException(nameof(imageSize), "头像图片的尺寸必须在512x512范围内。");
                 }
             }
             catch (Exception ex)
@@ -125,11 +146,11 @@ namespace HomeSettings
         /// <param name="sourceAvatarFileName">目标头像文件文件名</param>
         private void ChangeAvatar(string sourceAvatarFileName)
         {
-            string sourceAvatarFilePath = Path.Combine(avatarFolderPath, sourceAvatarFileName);
+            string sourceAvatarFilePath = Path.Combine(_avatarFolderPath, sourceAvatarFileName);
 
             try
             {
-                File.Copy(sourceAvatarFilePath, avatarImageFilePath, true);
+                File.Copy(sourceAvatarFilePath, _avatarImageFilePath, true);
                 LoadAvatarImage();
             }
             catch (Exception ex)
@@ -182,10 +203,10 @@ namespace HomeSettings
         /// </summary>
         private string[] GetAvatarImageFiles()
         {
-            return Directory.GetFiles(avatarFolderPath)
-                .Where(file => Path.GetExtension(file).Equals(".png", StringComparison.CurrentCultureIgnoreCase))
+            return Directory.GetFiles(_avatarFolderPath)
+                .Where(file => Path.GetExtension(file).Equals(".png", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(file => file)
-                .ToArray();
+                .ToArray(); 
         }
 
         /// <summary>
@@ -226,8 +247,10 @@ namespace HomeSettings
         /// </summary>
         private void AddAvatarListViewItem(string fileName)
         {
-            ListViewItem item = new ListViewItem(fileName);
-            item.ImageKey = fileName;
+            ListViewItem item = new ListViewItem(fileName)
+            {
+                ImageKey = fileName
+            };
             AvatarListView.Items.Add(item);
         }
 
@@ -238,7 +261,7 @@ namespace HomeSettings
         {
             try
             {
-                Process.Start(new ProcessStartInfo(avatarFolderPath)
+                Process.Start(new ProcessStartInfo(_avatarFolderPath)
                 {
                     UseShellExecute = true
                 });
@@ -254,7 +277,7 @@ namespace HomeSettings
         /// </summary>
         private void RunAvatarMaker()
         {
-            string avatarMakerPath = Path.Combine(appPath, "AvatarMaker.exe");
+            string avatarMakerPath = Path.Combine(_appPath, "AvatarMaker.exe");
 
             try
             {
@@ -277,9 +300,9 @@ namespace HomeSettings
             try
             {
                 // 如果头像目录不存在则创建头像目录
-                if (!Directory.Exists(avatarFolderPath))
+                if (!Directory.Exists(_avatarFolderPath))
                 {
-                    Directory.CreateDirectory(avatarFolderPath);
+                    Directory.CreateDirectory(_avatarFolderPath);
                 }
             }
             catch (Exception ex)
@@ -291,6 +314,25 @@ namespace HomeSettings
         #endregion
 
         #region 窗口事件处理程序
+
+        private void SettingsWindow_Load(object sender, EventArgs e)
+        {
+            this.BeginInvoke(() =>
+            {
+                ApplyTheme(_darkMode);
+
+                InitializeEggyRank();
+
+                LoadAvatarImage();
+                LoadAvatarImageList();
+            });
+
+        }
+
+        private void SettingsWindow_DpiChanged(object sender, DpiChangedEventArgs e)
+        {
+            SetBackgroundImage(e.DeviceDpiNew, _darkMode);
+        }
 
         private void OpenAvatarFolderButton_Click(object sender, EventArgs e)
         {
@@ -315,12 +357,11 @@ namespace HomeSettings
         private void AvatarListView_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             // 使用模式匹配减少空引用检查
-            if (AvatarListView.GetItemAt(e.X, e.Y) is ListViewItem { ImageKey: string imageKey })
+            if (AvatarListView.GetItemAt(e.X, e.Y) is { ImageKey: { } imageKey })
             {
                 // 获取选中的头像文件名
-                string selectedAvatarFileName = imageKey;
                 // 调用ChangeAvatar方法更换头像
-                ChangeAvatar(selectedAvatarFileName);
+                ChangeAvatar(imageKey);
             }
         }
 
