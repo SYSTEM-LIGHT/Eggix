@@ -1,6 +1,6 @@
 # OpenEggyUI
 
-![Maintenance](https://img.shields.io/badge/Maintained%3F-Yes-green)
+![Maintenance](https://img.shields.io/badge/Maintained%3F-No-red)
 ![Last Commit](https://img.shields.io/github/last-commit/SYSTEM-LIGHT/OpenEggyUI)
 ![Windows Support](https://img.shields.io/badge/Windows-Supported-blue)
 ![GPL-3.0](https://img.shields.io/badge/Code-GPL--3.0-blue.svg)
@@ -12,6 +12,10 @@
 > - 代码部分严格遵循 [GNU GPLv3](LICENSE) 协议
 > - 美术资源采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 国际许可协议  
 > - 双许可证系统已通过[GPL兼容性审查](https://www.gnu.org/licenses/license-list.html#cc-by-nc-sa)
+
+> **OpenEggyUI 项目归档通知**<br>
+> OpenEggyUI 项目已于 2026 年 3 月 28 日正式归档。2026 年 3 月 21 日，[EggyUI-SE](https://github.com/QiXiaoLight/EggyUI-SE) 项目启动开发。它被定位为 **“不修改系统文件的核心美化包”** ，以独立安装包形式部署，用户可按需选择要安装的美化组件。未来还将配套建设美化工具集网站，为组件下载提供导航——用户若觉得内置组件不够用，可自行从云端补充。适用于 Windows 系统的美化组件，开源或闭源，多到不可计数。在此背景下，OpenEggyUI 已无独立存在的必要。其代码与设计将合并至 EggyUI-SE，后续仅为 EggyUI-SE 开发专有组件。桌面美化这一领域，技术实现与使用者心理感受同样复杂。我们从不认为能推出“完美”的产品，只能根据评价与反馈不断探索、调整、优化。请理解这一决策。我们相信，EggyUI-SE 会带来更安全、更稳定的美化体验。
+
 
 > 继承精神，重塑形态。
 

@@ -2,27 +2,26 @@
 // 此代码由冷情镜像站编写。
 // 本项目仅用于学习与交流，严禁将 OpenEggyUI 及其组件用于任何商业用途。
 
-using System.Diagnostics;
-using System.Drawing.Text;
 using HomeSettings.Properties;
+using System.Diagnostics;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 
 namespace HomeSettings
 {
     public partial class SettingsWindow : Form
     {
-        private readonly string _appPath = AppDomain.CurrentDomain.BaseDirectory;
-        private readonly string _avatarFolderPath;
-        private readonly string _avatarImageFilePath;
-        private readonly bool _darkMode = DarkModeHelper.IsDarkModeEnabled();
+        private int _lastBackgroundDpi = -1;
+        private static readonly string CustomFontName = "方正兰亭圆简体_粗";
+        private static bool? _isCustomFontAvailable;
 
         public SettingsWindow()
         {
             InitializeComponent();
-            
-            _avatarFolderPath = Path.Combine(_appPath, "Avatars");
-            _avatarImageFilePath = Path.Combine(_appPath, "avatar.png");
-            
             CreateAvatarFolder();
+
+            this.HandleCreated += SettingsWindow_HandleCreated;
+            this.FormClosed += SettingsWindow_FormClosed;
         }
 
         #region 窗口方法
@@ -30,50 +29,57 @@ namespace HomeSettings
         /// <summary>
         /// 应用窗口主题
         /// </summary>
-        private void ApplyTheme(bool darkMode)
+        private void ApplyTheme()
         {
-            const string fontName = "方正兰亭圆简体_粗";
-            using (var installedFonts = new InstalledFontCollection())
+            if (!this.IsHandleCreated)
             {
-                if (installedFonts.Families.Any(f => f.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase)))
+                return;
+            }
+
+            _isCustomFontAvailable ??= FontCache.IsFontInstalled(CustomFontName);
+
+            if (_isCustomFontAvailable.Value)
+            {
+                foreach (var control in this.Controls.OfType<Control>())
                 {
-                    foreach (var control in this.Controls.OfType<Control>())
-                    {
-                        float fontSize = control.Font.Size;
-                        control.Font.Dispose();
-                        control.Font = new Font(fontName, fontSize, FontStyle.Regular);
-                    }
+                    control.Font = FontCache.GetFont(CustomFontName, control.Font.Size, FontStyle.Regular);
                 }
             }
-            
-            this.BackColor = darkMode ? SystemColors.Window : Color.FromArgb(11, 148, 255);
-            AvatarListView.BackColor = darkMode ? SystemColors.Window : Color.FromArgb(15, 108, 230);
-            AvatarListView.ForeColor = darkMode ? SystemColors.WindowText : Color.White;
-            
-            SetBackgroundImage(this.DeviceDpi, darkMode);
+
+            this.BackColor = AppStatus.IsDarkModeAndWin11 ? SystemColors.Window : Color.FromArgb(11, 148, 255);
+            AvatarListView.BackColor = AppStatus.IsDarkModeAndWin11 ? SystemColors.Window : Color.FromArgb(15, 108, 230);
+            AvatarListView.ForeColor = AppStatus.IsDarkModeAndWin11 ? SystemColors.WindowText : Color.White;
+
+            SetBackgroundImage(this.DeviceDpi);
         }
 
         /// <summary>
         /// 设置窗口背景
         /// </summary>
-        /// <param name="dpi">当前DPI</param>
-        /// <param name="darkMode">深色模式状态</param>
-        private void SetBackgroundImage(int dpi, bool darkMode)
+        /// <param name="dpi">当前 DPI</param>
+        private void SetBackgroundImage(int dpi)
         {
+            if (_lastBackgroundDpi == dpi)
+            {
+                return;
+            }
+
+            _lastBackgroundDpi = dpi;
+
             try
             {
-                this.BackgroundImage = darkMode ? dpi switch
-                    {
-                        >= 96 and < 144 => Resources.background_dark_540P,
-                        >= 144 and < 192 => Resources.background_dark_720P,
-                        _ => Resources.background_dark
-                    }
-                    : dpi switch
-                    {
-                        >= 96 and < 144 => Resources.background_540P,
-                        >= 144 and < 192 => Resources.background_720P,
-                        _ => Resources.background
-                    };
+                this.BackgroundImage = AppStatus.IsDarkModeAndWin11 ? dpi switch
+                {
+                    >= 96 and < 144 => Resources.background_dark_540P,
+                    >= 144 and < 192 => Resources.background_dark_720P,
+                    _ => Resources.background_dark
+                }
+                : dpi switch
+                {
+                    >= 96 and < 144 => Resources.background_540P,
+                    >= 144 and < 192 => Resources.background_720P,
+                    _ => Resources.background
+                };
             }
             catch
             {
@@ -84,28 +90,48 @@ namespace HomeSettings
         /// <summary>
         /// 初始化蛋仔段位信息
         /// </summary>
-        private void InitializeEggyRank()
+        private async Task InitializeEggyRankAsync()
         {
-            string eggyDataXmlFilePath = Path.Combine(_appPath, "EggyData.xml");
+            string eggyDataXmlFilePath = Path.Combine(AppStatus.AppPath, "EggyData.xml");
 
             try
             {
-                EggyRank eggyRank = new EggyRank(eggyDataXmlFilePath);
-                LevelLabel.Text = $"{eggyRank}\nLv.{eggyRank.CurrentRank.Level}";
+                var eggyRank = await Task.Run(() => new EggyRank(eggyDataXmlFilePath));
+                UpdateLevelLabel(eggyRank);
             }
             catch (FileNotFoundException)
             {
-                EggyRank eggyRank = new EggyRank();
-                LevelLabel.Text = $"{eggyRank}\nLv.{eggyRank.CurrentRank.Level}";
+                var eggyRank = new EggyRank();
+                UpdateLevelLabel(eggyRank);
             }
             catch (Exception ex)
             {
                 ShowError(ex, "段位信息加载");
-                LevelLabel.Text = "段位信息加载失败";
+                UpdateLevelLabelError();
             }
         }
 
-        private void ShowError(Exception ex, string failActionTitle)
+        private void UpdateLevelLabel(EggyRank eggyRank)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(() => UpdateLevelLabel(eggyRank));
+                return;
+            }
+            LevelLabel.Text = $"{eggyRank}\nLv.{eggyRank.CurrentRank.Level}";
+        }
+
+        private void UpdateLevelLabelError()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(UpdateLevelLabelError);
+                return;
+            }
+            LevelLabel.Text = "段位信息加载失败";
+        }
+
+        private static void ShowError(Exception ex, string failActionTitle)
         {
             MessageBox.Show(
                 $"{failActionTitle}发生异常：{ex.GetType().Name}\r\n异常信息：{ex.Message}\r\n异常堆栈：{ex.StackTrace}",
@@ -115,23 +141,23 @@ namespace HomeSettings
         /// <summary>
         /// 加载头像图片
         /// </summary>
-        private void LoadAvatarImage()
+        private async void LoadAvatarImage()
         {
-            AvatarPictureBox.Image?.Dispose();
-            AvatarPictureBox.Image = null;
+            ClearAvatarPictureBox();
 
             try
             {
-                using Image tempImage = Image.FromFile(_avatarImageFilePath, true);
-                Size imageSize = tempImage.Size;
+                var image = await ImageCache.LoadImageAsync(AppStatus.AvatarImageFilePath);
+                Size imageSize = image.Size;
 
                 if (imageSize is { IsEmpty: false, Height: <= 512, Width: <= 512 })
                 {
-                    AvatarPictureBox.Image = new Bitmap(tempImage);
+                    SetAvatarPictureBoxImage(image);
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException(nameof(imageSize), "头像图片的尺寸必须在512x512范围内。");
+                    image.Dispose();
+                    throw new ArgumentOutOfRangeException(nameof(imageSize), "头像图片的尺寸必须在 512x512 范围内。");
                 }
             }
             catch (Exception ex)
@@ -140,17 +166,38 @@ namespace HomeSettings
             }
         }
 
+        private void ClearAvatarPictureBox()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(ClearAvatarPictureBox);
+                return;
+            }
+            AvatarPictureBox.Image?.Dispose();
+            AvatarPictureBox.Image = null;
+        }
+
+        private void SetAvatarPictureBoxImage(Image image)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(() => SetAvatarPictureBoxImage(image));
+                return;
+            }
+            AvatarPictureBox.Image = image;
+        }
+
         /// <summary>
         /// 更换头像
         /// </summary>
         /// <param name="sourceAvatarFileName">目标头像文件文件名</param>
         private void ChangeAvatar(string sourceAvatarFileName)
         {
-            string sourceAvatarFilePath = Path.Combine(_avatarFolderPath, sourceAvatarFileName);
+            string sourceAvatarFilePath = Path.Combine(AppStatus.AvatarFolderPath, sourceAvatarFileName);
 
             try
             {
-                File.Copy(sourceAvatarFilePath, _avatarImageFilePath, true);
+                File.Copy(sourceAvatarFilePath, AppStatus.AvatarImageFilePath, true);
                 LoadAvatarImage();
             }
             catch (Exception ex)
@@ -162,13 +209,14 @@ namespace HomeSettings
         /// <summary>
         /// 加载头像列表
         /// </summary>
-        private void LoadAvatarImageList()
+        private async void LoadAvatarImageList()
         {
             ClearAvatarList();
 
             try
             {
-                LoadAvatarImagesFromDirectory();
+                var items = await LoadAvatarImagesFromDirectoryAsync();
+                AddAvatarItemsToListView(items);
             }
             catch (Exception ex)
             {
@@ -181,6 +229,11 @@ namespace HomeSettings
         /// </summary>
         private void ClearAvatarList()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(ClearAvatarList);
+                return;
+            }
             AvatarListView.Items.Clear();
             AvatarImageList.Images.Clear();
         }
@@ -188,80 +241,87 @@ namespace HomeSettings
         /// <summary>
         /// 从目录加载头像图片
         /// </summary>
-        private void LoadAvatarImagesFromDirectory()
+        private async Task<List<(string FileName, Image Image)>> LoadAvatarImagesFromDirectoryAsync()
         {
             string[] imageFiles = GetAvatarImageFiles();
+            var items = new List<(string FileName, Image Image)>();
 
             foreach (string filePath in imageFiles)
             {
-                LoadSingleAvatarImage(filePath);
+                var item = await LoadSingleAvatarImageAsync(filePath);
+                if (item is not null)
+                {
+                    items.Add(item.Value);
+                }
+            }
+
+            return items;
+        }
+
+        /// <summary>
+        /// 批量添加头像到 ListView
+        /// </summary>
+        private void AddAvatarItemsToListView(IEnumerable<(string FileName, Image Image)> items)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(() => AddAvatarItemsToListView(items));
+                return;
+            }
+
+            foreach (var (fileName, image) in items)
+            {
+                AvatarImageList.Images.Add(fileName, image);
+                ListViewItem item = new ListViewItem(fileName) { ImageKey = fileName };
+                AvatarListView.Items.Add(item);
             }
         }
 
         /// <summary>
         /// 获取头像图片文件列表
         /// </summary>
-        private string[] GetAvatarImageFiles()
+        private static string[] GetAvatarImageFiles()
         {
-            return Directory.GetFiles(_avatarFolderPath)
-                .Where(file => Path.GetExtension(file).Equals(".png", StringComparison.OrdinalIgnoreCase))
-                .OrderBy(file => file)
-                .ToArray(); 
+            return [ .. from file in Directory.GetFiles(AppStatus.AvatarFolderPath)
+                where Path.GetExtension(file).Equals(".png", StringComparison.OrdinalIgnoreCase)
+                orderby file
+                select file ];
         }
 
         /// <summary>
         /// 加载单个头像图片
         /// </summary>
-        private void LoadSingleAvatarImage(string filePath)
+        private async Task<(string FileName, Image Image)?> LoadSingleAvatarImageAsync(string filePath)
         {
             string fileName = Path.GetFileName(filePath);
 
-            if (!TryLoadImageToList(filePath, fileName))
-            {
-                return;
-            }
-
-            AddAvatarListViewItem(fileName);
+            var image = await TryLoadImageAsync(filePath);
+            return image is null ? null : (fileName, image);
         }
 
         /// <summary>
-        /// 尝试加载图片到ImageList
+        /// 尝试加载图片
         /// </summary>
-        private bool TryLoadImageToList(string filePath, string fileName)
+        private async Task<Image?> TryLoadImageAsync(string filePath)
         {
             try
             {
-                using Image tempImage = Image.FromFile(filePath);
-                Image imageCopy = new Bitmap(tempImage);
-                AvatarImageList.Images.Add(fileName, imageCopy);
-                return true;
+                return await ImageCache.LoadImageAsync(filePath);
             }
             catch
             {
-                return false;
+                return null;
             }
-        }
-
-        /// <summary>
-        /// 添加头像到ListView
-        /// </summary>
-        private void AddAvatarListViewItem(string fileName)
-        {
-            ListViewItem item = new ListViewItem(fileName)
-            {
-                ImageKey = fileName
-            };
-            AvatarListView.Items.Add(item);
         }
 
         /// <summary>
         /// 打开头像文件夹
         /// </summary>
-        private void OpenAvatarFolder()
+        private static void OpenAvatarFolder()
         {
             try
             {
-                Process.Start(new ProcessStartInfo(_avatarFolderPath)
+                Process.Start(new ProcessStartInfo(AppStatus.AvatarFolderPath)
                 {
                     UseShellExecute = true
                 });
@@ -275,9 +335,9 @@ namespace HomeSettings
         /// <summary>
         /// 运行头像制作器
         /// </summary>
-        private void RunAvatarMaker()
+        private static void RunAvatarMaker()
         {
-            string avatarMakerPath = Path.Combine(_appPath, "AvatarMaker.exe");
+            string avatarMakerPath = Path.Combine(AppStatus.AppPath, "AvatarMaker.exe");
 
             try
             {
@@ -295,14 +355,14 @@ namespace HomeSettings
         /// <summary>
         /// 创建头像文件夹
         /// </summary>
-        private void CreateAvatarFolder()
+        private static void CreateAvatarFolder()
         {
             try
             {
                 // 如果头像目录不存在则创建头像目录
-                if (!Directory.Exists(_avatarFolderPath))
+                if (!Directory.Exists(AppStatus.AvatarFolderPath))
                 {
-                    Directory.CreateDirectory(_avatarFolderPath);
+                    Directory.CreateDirectory(AppStatus.AvatarFolderPath);
                 }
             }
             catch (Exception ex)
@@ -310,28 +370,52 @@ namespace HomeSettings
                 ShowError(ex, "头像目录创建");
             }
         }
-
+        
         #endregion
 
         #region 窗口事件处理程序
 
+        private void SettingsWindow_FormClosed(object? sender, FormClosedEventArgs e)
+        {
+            ImageCache.Clear();
+            FontCache.Clear();
+        }
+
+        private void SettingsWindow_HandleCreated(object? sender, EventArgs e)
+        {
+            ApplyTheme();
+        }
+
         private void SettingsWindow_Load(object sender, EventArgs e)
         {
-            this.BeginInvoke(() =>
+            _ = LoadDataAsync();
+        }
+
+        private async Task LoadDataAsync()
+        {
+            var tasks = new List<Task>
             {
-                ApplyTheme(_darkMode);
+                InitializeEggyRankAsync(),
+                LoadAvatarImageAsync(),
+                LoadAvatarImageListAsync()
+            };
 
-                InitializeEggyRank();
+            await Task.WhenAll(tasks);
+        }
 
-                LoadAvatarImage();
-                LoadAvatarImageList();
-            });
+        private async Task LoadAvatarImageAsync()
+        {
+            await Task.Run(LoadAvatarImage);
+        }
 
+        private async Task LoadAvatarImageListAsync()
+        {
+            await Task.Run(LoadAvatarImageList);
         }
 
         private void SettingsWindow_DpiChanged(object sender, DpiChangedEventArgs e)
         {
-            SetBackgroundImage(e.DeviceDpiNew, _darkMode);
+            SetBackgroundImage(e.DeviceDpiNew);
         }
 
         private void OpenAvatarFolderButton_Click(object sender, EventArgs e)
@@ -351,7 +435,19 @@ namespace HomeSettings
 
         private void RefreshAvatarListButton_Click(object sender, EventArgs e)
         {
-            LoadAvatarImageList();
+            _ = RefreshAvatarListAsync();
+        }
+
+        private async Task RefreshAvatarListAsync()
+        {
+            ClearAvatarList();
+            var items = await LoadAvatarImagesFromDirectoryAsync();
+            AddAvatarItemsToListView(items);
+        }
+
+        private void RefreshRankInfoButton_Click(object sender, EventArgs e)
+        {
+            _ = InitializeEggyRankAsync();
         }
 
         private void AvatarListView_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -363,11 +459,6 @@ namespace HomeSettings
                 // 调用ChangeAvatar方法更换头像
                 ChangeAvatar(imageKey);
             }
-        }
-
-        private void RefreshRankInfoButton_Click(object sender, EventArgs e)
-        {
-            InitializeEggyRank();
         }
 
         #endregion

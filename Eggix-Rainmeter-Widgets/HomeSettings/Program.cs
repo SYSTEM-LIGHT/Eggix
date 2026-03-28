@@ -84,7 +84,10 @@ namespace HomeSettings
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 Application.ThreadException += Application_ThreadException;
                 Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
-                Application.SetColorMode(SystemColorMode.System);
+                if (Environment.OSVersion.Version.Build >= 22000) // Windows 11 21H2 及以上版本
+                {
+                    Application.SetColorMode(SystemColorMode.System);
+                }
                 Application.EnableVisualStyles();
 
                 try
@@ -121,7 +124,7 @@ namespace HomeSettings
                     return;
                 }
 
-                foreach (Process process in processes)
+                foreach (var process in processes)
                 {
                     if (process.Id == current.Id)
                     {
@@ -139,6 +142,7 @@ namespace HomeSettings
                     }
                     catch (InvalidOperationException)
                     {
+                        // 进程已退出，继续查找其他实例
                     }
                 }
             }
@@ -172,9 +176,7 @@ namespace HomeSettings
             }
             else
             {
-                ShowError(
-                    $"发生未知错误：{e.ExceptionObject}",
-                    "未知错误");
+                ShowError($"发生未知错误：{e.ExceptionObject}", "未知错误");
             }
         }
 

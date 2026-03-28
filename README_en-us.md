@@ -1,6 +1,6 @@
 # OpenEggyUI
 
-![Maintenance](https://img.shields.io/badge/Maintained%3F-Yes-green)
+![Maintenance](https://img.shields.io/badge/Maintained%3F-No-red)
 ![Last Commit](https://img.shields.io/github/last-commit/SYSTEM-LIGHT/OpenEggyUI)
 ![Windows Support](https://img.shields.io/badge/Windows-Supported-blue)
 ![GPL-3.0](https://img.shields.io/badge/Code-GPL--3.0-blue.svg)
@@ -12,6 +12,9 @@
 > - Code licensed under [GNU GPLv3](LICENSE)
 > - Artwork licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) International License
 > - Dual-license system has passed [GPL compatibility review](https://www.gnu.org/licenses/license-list.html#cc-by-nc-sa)
+ 
+> **OpenEggyUI Project Archive Notice**<br>
+> The OpenEggyUI project was officially archived on March 28, 2026. On March 21, 2026, development began on the [EggyUI-SE](https://github.com/QiXiaoLight/EggyUI-SE) project, positioned as a **“core customization pack that does not modify system files.”** It is deployed as a standalone installer, allowing users to select which customization components to install as needed. In the future, a dedicated customization tools website will be established to provide navigation for downloading additional components—if users find the built-in components insufficient, they can supplement them from the cloud. Windows customization components—open source or closed source—are countless. Given this context, OpenEggyUI no longer needs to exist independently. Its code and design will be merged into EggyUI-SE, and future development will focus exclusively on components tailored for EggyUI-SE. Desktop customization is a complex field, involving not only technical implementation but also user experience and expectations. We have never claimed to offer a “perfect” product; we can only explore, adjust, and improve based on feedback and real-world usage. We ask for your understanding of this decision. We believe EggyUI-SE will deliver a safer and more stable customization experience.
 
 > Inheriting the spirit, reinventing the form.
 

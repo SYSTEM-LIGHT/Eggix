@@ -11,7 +11,7 @@ public sealed class EggyRank
     /// <summary>
     /// 构造函数，初始化默认蛋仔信息
     /// </summary>
-    public EggyRank() : this(BasicEggyRank.ChickenEgg, 3, 30) { }
+    public EggyRank() : this(3, 3, 30) { }
 
     /// <summary>
     /// 构造函数，初始化蛋仔信息
@@ -19,7 +19,7 @@ public sealed class EggyRank
     /// <param name="currentBasicEggyRank">当前大段位</param>
     /// <param name="currentSmallRank">当前小段位</param>
     /// <param name="currentLevel">当前等级</param>
-    public EggyRank(BasicEggyRank currentBasicEggyRank, int currentSmallRank, int currentLevel)
+    public EggyRank(long currentBasicEggyRank, long currentSmallRank, long currentLevel)
     {
         CurrentRank = new EggyRankInfo
         {
@@ -50,15 +50,15 @@ public sealed class EggyRank
     {
         return CurrentRank.BasicRank switch
         {
-            BasicEggyRank.QuailEgg => "鹌鹑蛋",
-            BasicEggyRank.PigeonEgg => "鸽子蛋",
-            BasicEggyRank.ChickenEgg => "鸡蛋",
-            BasicEggyRank.GooseEgg => "鹅蛋",
-            BasicEggyRank.OstrichEgg => "鸵鸟蛋",
-            BasicEggyRank.DinosaurEgg => "恐龙蛋",
-            BasicEggyRank.PeakPhoenixEgg => "巅峰凤凰蛋",
-            BasicEggyRank.SuperPhoenixEgg => "超级凤凰蛋",
-            BasicEggyRank.InvinciblePhoenixEgg => "无敌凤凰蛋",
+            1 => "鹌鹑蛋",
+            2 => "鸽子蛋",
+            3 => "鸡蛋",
+            4 => "鹅蛋",
+            5 => "鸵鸟蛋",
+            6 => "恐龙蛋",
+            7 => "巅峰凤凰蛋",
+            8 => "超级凤凰蛋",
+            9 => "无敌凤凰蛋",
             _ => "未知段位"
         };
     }
@@ -68,8 +68,9 @@ public sealed class EggyRank
     /// </summary>
     public override string ToString()
     {
-        return (int)CurrentRank.BasicRank <= 6 ? $"{GetBasicRankName()} {CurrentRank.SmallRank}阶"
-            : $"{GetBasicRankName()} {CurrentRank.SmallRank}分";
+        return CurrentRank.BasicRank is >= 1 and <= 6
+        ? $"{GetBasicRankName()} {CurrentRank.SmallRank}阶"
+        : $"{GetBasicRankName()} {CurrentRank.SmallRank}分";
     }
 
     /// <summary>
@@ -83,22 +84,36 @@ public sealed class EggyRank
             throw new FileNotFoundException("找不到指定的 XML 文件", filePath);
         }
 
-        var serializer = new XmlSerializer(typeof(EggyRankData));
-        using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        using var reader = XmlReader.Create(fileStream, new XmlReaderSettings
+        try
         {
-            DtdProcessing = DtdProcessing.Prohibit,
-            MaxCharactersFromEntities = 0,
-            ValidationType = ValidationType.None
-        });
+            var serializer = new XmlSerializer(typeof(EggyRankData));
+            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            using var reader = XmlReader.Create(fileStream, new XmlReaderSettings
+            {
+                DtdProcessing = DtdProcessing.Prohibit,
+                MaxCharactersFromEntities = 0,
+                ValidationType = ValidationType.None
+            });
 
-        if (serializer.Deserialize(reader) is EggyRankData data)
+            if (serializer.Deserialize(reader) is EggyRankData data)
+            {
+                double basicRankValue = Math.Clamp(data.BasicRank, 1, 9);
+
+                CurrentRank = new EggyRankInfo
+                {
+                    BasicRank = unchecked((long)(double.IsFinite(basicRankValue) ? basicRankValue : 9)),
+                    SmallRank = unchecked((long)data.SmallRank),
+                    Level = unchecked((long)data.Level)
+                };
+            }
+        }
+        catch
         {
             CurrentRank = new EggyRankInfo
             {
-                BasicRank = (BasicEggyRank)data.BasicRank,
-                SmallRank = data.SmallRank,
-                Level = data.Level
+                BasicRank = 3,
+                SmallRank = 3,
+                Level = 30
             };
         }
     }
@@ -111,7 +126,7 @@ public sealed class EggyRank
     {
         var data = new EggyRankData
         {
-            BasicRank = (int)CurrentRank.BasicRank,
+            BasicRank = CurrentRank.BasicRank,
             SmallRank = CurrentRank.SmallRank,
             Level = CurrentRank.Level
         };
@@ -128,8 +143,8 @@ public sealed class EggyRank
     {
         CurrentRank = new EggyRankInfo
         {
-            BasicRank = BasicEggyRank.QuailEgg,
-            SmallRank = 1,
+            BasicRank = 3,
+            SmallRank = 3,
             Level = 30
         };
     }
@@ -143,17 +158,17 @@ public struct EggyRankInfo
     /// <summary>
     /// 巅峰派对大段位
     /// </summary>
-    internal BasicEggyRank BasicRank;
+    internal long BasicRank;
 
     /// <summary>
     /// 巅峰派对小段位
     /// </summary>
-    internal int SmallRank;
+    internal long SmallRank;
 
     /// <summary>
     /// 等级
     /// </summary>
-    internal int Level;
+    internal long Level;
 }
 
 /// <summary>
@@ -164,66 +179,15 @@ public sealed class EggyRankData
     /// <summary>
     /// 大段位索引
     /// </summary>
-    public int BasicRank { get; init; }
+    public double BasicRank { get; init; }
 
     /// <summary>
     /// 小段位
     /// </summary>
-    public int SmallRank { get; init; }
+    public double SmallRank { get; init; }
 
     /// <summary>
     /// 等级
     /// </summary>
-    public int Level { get; init; }
-}
-
-/// <summary>
-/// 巅峰派对大段位枚举常数
-/// </summary>
-public enum BasicEggyRank
-{
-    /// <summary>
-    /// 鹌鹑蛋
-    /// </summary>
-    QuailEgg = 1,
-
-    /// <summary>
-    /// 鸽子蛋
-    /// </summary>
-    PigeonEgg = 2,
-
-    /// <summary>
-    /// 鸡蛋
-    /// </summary>
-    ChickenEgg = 3,
-
-    /// <summary>
-    /// 鹅蛋
-    /// </summary>
-    GooseEgg = 4,
-
-    /// <summary>
-    /// 鸵鸟蛋
-    /// </summary>
-    OstrichEgg = 5,
-
-    /// <summary>
-    /// 恐龙蛋
-    /// </summary>
-    DinosaurEgg = 6,
-
-    /// <summary>
-    /// 巅峰凤凰蛋
-    /// </summary>
-    PeakPhoenixEgg = 7,
-
-    /// <summary>
-    /// 超级凤凰蛋
-    /// </summary>
-    SuperPhoenixEgg = 8,
-
-    /// <summary>
-    /// 无敌凤凰蛋
-    /// </summary>
-    InvinciblePhoenixEgg = 9
+    public double Level { get; init; }
 }
